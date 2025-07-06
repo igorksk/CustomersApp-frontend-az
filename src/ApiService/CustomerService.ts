@@ -1,4 +1,4 @@
-const BASE_URL = "http://localhost:7082/customers";
+const BASE_URL = "https://customers-app-esayame8hcc4amav.canadacentral-01.azurewebsites.net/customers";
 
 const customerService = {
   async getAll(search = "", sortBy = "", desc = true, page = 1, pageSize = 10) {
