@@ -5,12 +5,8 @@ import Search from "antd/es/input/Search";
 import "antd/dist/reset.css";
 import customerService from "../ApiService/CustomerService";
 import "./Customers.css";
-
-interface Customer {
-  id: number;
-  name: string;
-  email: string;
-}
+import { useCustomerModal } from "./useCustomerModal";
+import { Customer } from "./types";
 
 export default function Customers() {
   const [customers, setCustomers] = useState<Customer[]>([]);
@@ -20,16 +16,22 @@ export default function Customers() {
   const [desc, setDesc] = useState<boolean>(true);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [pageSize] = useState<number>(10);
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
-  const [form] = Form.useForm();
+
+  const {
+    isModalOpen,
+    editingCustomer,
+    form,
+    openAddModal,
+    openEditModal,
+    closeModal,
+  } = useCustomerModal();
 
   const loadCustomers = useCallback(async () => {
     const data = await customerService.getAll(search, sortBy, desc, currentPage, pageSize);
     setCustomers(data.customers);
     setTotalCustomers(data.total);
   }, [search, sortBy, desc, currentPage, pageSize]);
-  
+
   useEffect(() => {
     loadCustomers();
   }, [loadCustomers]);
@@ -39,18 +41,6 @@ export default function Customers() {
     loadCustomers();
   };
 
-  const handleAdd = () => {
-    setEditingCustomer(null);
-    form.resetFields();
-    setIsModalOpen(true);
-  };
-
-  const handleEdit = (customer: Customer) => {
-    setEditingCustomer(customer);
-    form.setFieldsValue(customer);
-    setIsModalOpen(true);
-  };
-
   const handleSave = async () => {
     form.validateFields().then(async (values) => {
       if (editingCustomer) {
@@ -58,7 +48,7 @@ export default function Customers() {
       } else {
         await customerService.create(values);
       }
-      setIsModalOpen(false);
+      closeModal();
       loadCustomers();
     });
   };
@@ -89,7 +79,7 @@ export default function Customers() {
                 { value: "false", label: "Ascending" }
               ]}
             />
-            <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
+            <Button type="primary" icon={<PlusOutlined />} onClick={openAddModal}>
               Add
             </Button>
           </div>
@@ -106,7 +96,7 @@ export default function Customers() {
                 title: "Actions",
                 render: (_: any, record: Customer) => (
                   <div className="actions-container">
-                    <Button icon={<EditOutlined />} onClick={() => handleEdit(record)} />
+                    <Button icon={<EditOutlined />} onClick={() => openEditModal(record)} />
                     <Button icon={<DeleteOutlined />} danger onClick={() => handleDelete(record.id)} />
                   </div>
                 ),
@@ -124,7 +114,7 @@ export default function Customers() {
       <Modal
         title={editingCustomer ? "Edit Customer" : "Add Customer"}
         open={isModalOpen}
-        onCancel={() => setIsModalOpen(false)}
+        onCancel={closeModal}
         onOk={handleSave}
       >
         <Form form={form} layout="vertical">
