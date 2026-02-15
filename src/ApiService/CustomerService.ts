@@ -49,6 +49,12 @@ const customerService = {
 
     if (!response.ok) throw new Error("Failed to delete customer");
   },
+
+  async reset() {
+    const response = await fetch(`${BASE_URL}/reset`, { method: "POST" });
+
+    if (!response.ok) throw new Error("Failed to reset customers");
+  },
 };
 
 export default customerService;

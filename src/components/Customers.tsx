@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { Table, Input, Button, Select, Modal, Form } from "antd";
+import { Table, Input, Button, Select, Modal, Form, Popconfirm } from "antd";
 import { EditOutlined, DeleteOutlined, PlusOutlined } from "@ant-design/icons";
 import Search from "antd/es/input/Search";
 import "antd/dist/reset.css";
@@ -82,6 +82,14 @@ export default function Customers() {
             <Button type="primary" icon={<PlusOutlined />} onClick={openAddModal}>
               Add
             </Button>
+            <Popconfirm
+              title="Reset all data to seed dataset? This will delete current customers."
+              onConfirm={async () => { await customerService.reset(); await loadCustomers(); }}
+              okText="Yes"
+              cancelText="No"
+            >
+              <Button danger style={{ marginLeft: 8 }}>Reset</Button>
+            </Popconfirm>
           </div>
         </div>
         <div className="table-container">
