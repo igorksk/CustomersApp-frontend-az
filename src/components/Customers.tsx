@@ -8,6 +8,16 @@ import "./Customers.css";
 import { useCustomerModal } from "./useCustomerModal";
 import { Customer } from "./types";
 
+// Highlight search matches in text
+function highlightMatch(text: string, search: string) {
+  if (!search) return text;
+  const regex = new RegExp(`(${search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`, "gi");
+  const parts = text.split(regex);
+  return parts.map((part, i) =>
+    regex.test(part) ? <mark key={i}>{part}</mark> : part
+  );
+}
+
 export default function Customers() {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [totalCustomers, setTotalCustomers] = useState<number>(0);
@@ -98,8 +108,16 @@ export default function Customers() {
             rowKey="id"
             columns={[
               { title: "ID", dataIndex: "id" },
-              { title: "Name", dataIndex: "name" },
-              { title: "Email", dataIndex: "email" },
+              {
+                title: "Name",
+                dataIndex: "name",
+                render: (text: string) => highlightMatch(text, search),
+              },
+              {
+                title: "Email",
+                dataIndex: "email",
+                render: (text: string) => highlightMatch(text, search),
+              },
               {
                 title: "Actions",
                 render: (_: any, record: Customer) => (
@@ -117,7 +135,7 @@ export default function Customers() {
               onChange: setCurrentPage
             }}
           />
-        </div>
+        </div>     
       </div>
       <Modal
         title={editingCustomer ? "Edit Customer" : "Add Customer"}
